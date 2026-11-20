@@ -119,13 +119,14 @@ button{cursor:pointer}
 }
 .topbar{
   display:flex;
+  flex-wrap:wrap;
   align-items:center;
   justify-content:space-between;
-  gap:10px;
+  gap:0 10px;
   padding:8px 12px 0;
   min-height:48px;
 }
-.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand{display:flex;align-items:center;gap:10px;min-width:0;order:1}
 .brand img{
   width:36px;height:36px;border-radius:10px;display:block;
   background:#000;box-shadow:0 0 0 1px rgba(255,255,255,.12);
@@ -136,8 +137,89 @@ button{cursor:pointer}
 .brand-sub{
   color:var(--accent-text);font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;margin-top:2px;
 }
-.top-actions{display:flex;align-items:center;gap:6px;min-width:0}
+.top-actions{display:flex;align-items:center;gap:6px;min-width:0;order:2}
 .top-actions .icon-btn{width:40px;height:40px}
+.quote-slot{
+  order:3;
+  flex:1 0 100%;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+  padding:6px 0 8px;
+}
+.quote-btn{
+  flex:1 1 auto;
+  min-width:0;
+  height:40px;
+  border-radius:12px;
+  border:1px solid color-mix(in srgb, var(--accent) 42%, var(--line-strong));
+  background:linear-gradient(100deg, color-mix(in srgb, var(--accent) 20%, var(--elev-2)), color-mix(in srgb, var(--accent) 8%, var(--elev-2)));
+  color:var(--text);
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:0 12px 0 10px;
+  font-weight:600;
+  font-size:13px;
+  letter-spacing:-.01em;
+  text-align:left;
+}
+.q-mark{
+  flex:0 0 auto;
+  color:var(--accent-text);
+  font-size:18px;
+  font-weight:700;
+  line-height:1;
+}
+.q-text{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.rain-btn{
+  flex:0 0 40px;
+  width:40px;
+  height:40px;
+  border-radius:12px;
+  border:1px solid color-mix(in srgb, var(--ok) 55%, var(--line-strong));
+  background:color-mix(in srgb, var(--ok) 18%, var(--elev-2));
+  color:inherit;
+  font-size:18px;
+  line-height:1;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+  font-family:"Noto Color Emoji","Apple Color Emoji","Segoe UI Emoji",sans-serif;
+}
+.money-rain{
+  position:fixed;
+  inset:0;
+  z-index:30;
+  overflow:hidden;
+  pointer-events:none;
+}
+.money-rain,.money-rain *{pointer-events:none}
+.bill{
+  position:absolute;
+  top:-48px;
+  opacity:0;
+  line-height:1;
+  user-select:none;
+  font-family:"Noto Color Emoji","Apple Color Emoji","Segoe UI Emoji",sans-serif;
+  will-change:transform,opacity;
+  animation-name:billFall;
+  animation-timing-function:linear;
+  animation-fill-mode:both;
+}
+@keyframes billFall{
+  0%{transform:translate3d(0,-12px,0) rotate(0deg);opacity:0}
+  12%{opacity:var(--op,1)}
+  88%{opacity:var(--op,1)}
+  100%{transform:translate3d(var(--drift),118dvh,0) rotate(var(--spin));opacity:0}
+}
 .icon-btn.is-on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .sync{
   display:flex;align-items:center;gap:6px;min-width:0;
@@ -169,8 +251,10 @@ button{cursor:pointer}
 @media (hover:hover) and (pointer:fine){
   .btn:hover,.icon-btn:hover{background:var(--hover);transform:translateY(-1px)}
   .btn-primary:hover{box-shadow:0 8px 22px rgba(62,200,255,.28)}
+  .quote-btn:hover{border-color:var(--accent);transform:translateY(-1px)}
+  .rain-btn:hover{transform:translateY(-1px);border-color:var(--ok)}
 }
-.btn:active,.icon-btn:active,.day-chip:active{transform:scale(.96)}
+.btn:active,.icon-btn:active,.day-chip:active,.quote-btn:active,.rain-btn:active{transform:scale(.96)}
 .btn-primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .btn-primary:hover{background:var(--accent-2);border-color:var(--accent-2)}
 .btn svg,.icon-btn svg{width:18px;height:18px;flex:0 0 auto}
@@ -506,7 +590,11 @@ body.is-editing .leg-del{display:grid}
 }
 @media (min-width:900px){
   :root{--name-col:200px;--slot-min:76px;--row-h:58px}
-  .topbar{padding:12px 20px 0}
+  .topbar{flex-wrap:nowrap;gap:16px;padding:12px 20px 0}
+  .brand,.top-actions{flex-shrink:0}
+  .top-actions{order:3}
+  .quote-slot{order:2;flex:1 1 auto;width:auto;padding:0;justify-content:center}
+  .quote-btn{flex:0 1 auto;max-width:min(520px,100%);font-size:14px;height:40px}
   .toolbar{flex-direction:row;align-items:center;padding:10px 20px 12px}
   .tool-cluster{margin-left:auto}
   .tool-cluster .btn{flex:0 0 auto}
@@ -546,6 +634,8 @@ body.is-editing .leg-del{display:grid}
   <div class="loading-text">Lade Schichtplan</div>
 </div>
 
+<div class="money-rain" id="moneyRain" aria-hidden="true"></div>
+
 <div class="shell">
   <div class="chrome">
     <header class="topbar">
@@ -555,6 +645,13 @@ body.is-editing .leg-del{display:grid}
           <div class="brand-name">Nakama</div>
           <div class="brand-sub">Schichtplan</div>
         </div>
+      </div>
+      <div class="quote-slot">
+        <button type="button" class="quote-btn" id="quoteBtn">
+          <span class="q-mark" aria-hidden="true">“</span>
+          <span class="q-text" id="quoteText"></span>
+        </button>
+        <button type="button" class="rain-btn" id="rainBtn" aria-label="Geldregen">💸</button>
       </div>
       <div class="top-actions">
         <div class="sync" id="syncStatus">
@@ -785,6 +882,8 @@ var toastTimer=0;
 function showToast(msg){
   var t=document.getElementById("toast");
   if(!t) return;
+  var chrome=document.querySelector(".chrome");
+  if(chrome) t.style.top=Math.round(chrome.getBoundingClientRect().bottom+10)+"px";
   t.textContent=msg;
   t.classList.remove("show");
   void t.offsetWidth;
@@ -922,11 +1021,153 @@ function toggleInfo(force){
   pop.style.right=Math.max(12, window.innerWidth-r.right)+"px";
 }
 
+var QUOTES=[
+  "Heute zählt jedes Gespräch.",
+  "Ran an die Tasten, Team.",
+  "Jeder Chat ist eine Chance.",
+  "Fokus, Charme, Abschluss.",
+  "Schicht an, Umsatz hoch.",
+  "Niemand bleibt allein.",
+  "Schnell, klar, freundlich.",
+  "Energie rein, Zahlen raus.",
+  "Der nächste Fan wartet.",
+  "Zusammen sind wir stärker.",
+  "Kein Leerlauf heute.",
+  "Dranbleiben gewinnt.",
+  "Kleine Zeile, große Wirkung.",
+  "Teamgeist schlägt Einzelkampf.",
+  "Heute holen wir alles.",
+  "Präsenz ist unser Plus.",
+  "Wer fragt, schließt ab.",
+  "Ruhe im Kopf, Tempo im Chat.",
+  "Jede Stunde zählt.",
+  "Nakama zieht zusammen.",
+  "Gute Laune tippt mit.",
+  "Erst zuhören, dann führen.",
+  "Die Schicht gehört uns.",
+  "Klartext schafft Vertrauen.",
+  "Bleib dran, bis es sitzt.",
+  "Energie ist ansteckend.",
+  "Wir spielen auf Sieg.",
+  "Qualität in jedem Satz.",
+  "Heute volle Kraft.",
+  "Zuhören öffnet den Deal.",
+  "Abschluss ist Teamwork.",
+  "Frisch rein, stark bleiben.",
+  "Tempo ja, Hektik nein.",
+  "Jeder Slot zählt.",
+  "Fans spüren echte Nähe.",
+  "Wir liefern, Schicht um Schicht.",
+  "Kurz, warm, treffend.",
+  "Heute wird kassiert.",
+  "Kopf hoch, Antwort raus.",
+  "Gemeinsam über die Linie.",
+  "Der Chat lebt von dir.",
+  "Sauber arbeiten, stark enden.",
+  "Keine Ausreden, nur Chancen.",
+  "Wir sind im Flow.",
+  "Eine Frage mehr, ein Ja.",
+  "Fokus ist unser Turbo.",
+  "Freundlich und hartnäckig.",
+  "Erst die Haltung, dann die Zahl.",
+  "Schichtstart. Köpfe hoch.",
+  "Heute glänzt das Team.",
+  "Nähe im Text, klar im Deal.",
+  "Wer da ist, gewinnt.",
+  "Ruhig bleiben, Gas geben.",
+  "Jede Antwort ist ein Pitch.",
+  "Aus Chats wird Umsatz.",
+  "Starke Schicht, starkes Team.",
+  "Nicht warten. Schreiben.",
+  "Heute setzen wir Maßstäbe.",
+  "Ziele knacken wir zusammen.",
+  "Der Vibe macht den Deal.",
+  "Herzlich und konsequent.",
+  "Volle Schicht, voller Fokus.",
+  "Wir sind bereit. Los.",
+  "Heute wird legendär.",
+  "Sales mit Herz.",
+  "Eine Stimme, ein Team.",
+  "Dieser Chat. Dieser Moment.",
+  "Bleib dran. Das Ja kommt.",
+  "Charmant bleiben, nachfassen.",
+  "Wir machen den Unterschied.",
+  "Hoch die Energie, rein in den Chat.",
+  "Heute kein Stillstand."
+];
+function dayNumber(date){
+  return Math.floor(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())/86400000);
+}
+function quoteFor(date){
+  var n=QUOTES.length;
+  var i=dayNumber(date)%n;
+  if(i<0) i+=n;
+  return QUOTES[i];
+}
+function renderQuote(){
+  var q=quoteFor(new Date());
+  var text=document.getElementById("quoteText");
+  var btn=document.getElementById("quoteBtn");
+  if(text) text.textContent=q;
+  if(btn){
+    btn.setAttribute("aria-label", q+". Geldregen starten");
+    btn.title=q;
+  }
+}
+var quoteTimer=0;
+function scheduleQuoteRefresh(){
+  clearTimeout(quoteTimer);
+  var now=new Date();
+  var next=new Date(now.getFullYear(), now.getMonth(), now.getDate()+1, 0, 0, 2);
+  var wait=next.getTime()-now.getTime();
+  if(!(wait>1000)) wait=1000;
+  quoteTimer=setTimeout(function(){ renderQuote(); scheduleQuoteRefresh(); }, wait);
+}
+var rainTimer=0;
+function clearMoneyRain(){
+  var layer=document.getElementById("moneyRain");
+  if(layer) layer.textContent="";
+}
+function moneyRain(){
+  var layer=document.getElementById("moneyRain");
+  if(!layer) return;
+  clearTimeout(rainTimer);
+  layer.textContent="";
+  if(window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  var glyphs=["💸","💶","🪙","💰"];
+  var mobile=window.matchMedia("(max-width: 899px)").matches;
+  var n=mobile?20:32;
+  var frag=document.createDocumentFragment();
+  var longest=0;
+  for(var i=0;i<n;i++){
+    var el=document.createElement("span");
+    el.className="bill";
+    el.textContent=glyphs[i%glyphs.length];
+    var delay=Math.random()*0.6;
+    var dur=2.6+Math.random()*1.05;
+    if(delay+dur>longest) longest=delay+dur;
+    var size=(mobile?20:22)+Math.floor(Math.random()*(mobile?14:16));
+    var left=((i+0.5)/n)*100+(Math.random()*8-4);
+    if(left<1) left=1;
+    if(left>97) left=97;
+    el.style.left=left.toFixed(2)+"%";
+    el.style.fontSize=size+"px";
+    el.style.animationDelay=delay.toFixed(2)+"s";
+    el.style.animationDuration=dur.toFixed(2)+"s";
+    el.style.setProperty("--drift", (Math.random()*70-35).toFixed(1)+"px");
+    el.style.setProperty("--spin", (Math.random()*80-40).toFixed(1)+"deg");
+    el.style.setProperty("--op", (0.82+Math.random()*0.18).toFixed(2));
+    frag.appendChild(el);
+  }
+  layer.appendChild(frag);
+  rainTimer=setTimeout(clearMoneyRain, Math.ceil(longest*1000)+240);
+}
 function hideOverlay(){
   var ov=document.getElementById("loadingOverlay");
   if(!ov||ov.classList.contains("hidden")) return;
   ov.classList.add("hidden");
   setTimeout(function(){ ov.style.display="none"; }, 400);
+  moneyRain();
 }
 
 function selectedCells(){
@@ -1377,6 +1618,8 @@ document.getElementById("addChatterBtn").addEventListener("click",openAddChatter
 document.getElementById("addProfileBtn").addEventListener("click",openAddProfile);
 document.getElementById("exportBtn").addEventListener("click",exportCSV);
 document.getElementById("themeBtn").addEventListener("click",toggleTheme);
+document.getElementById("quoteBtn").addEventListener("click",moneyRain);
+document.getElementById("rainBtn").addEventListener("click",moneyRain);
 document.getElementById("editBtn").addEventListener("click",toggleEdit);
 document.getElementById("infoBtn").addEventListener("click",function(e){ e.stopPropagation(); toggleInfo(); });
 document.getElementById("closeModalBtn").addEventListener("click",closeChModal);
@@ -1592,6 +1835,8 @@ loadLocal();
 seedOffline();
 render();
 if(OFFLINE) setSyncStatus("ok","Lokal");
+renderQuote();
+scheduleQuoteRefresh();
 pull();
 setTimeout(hideOverlay, 1100);
 setInterval(pull, 10000);
